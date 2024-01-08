@@ -12,20 +12,23 @@ async def insert_group(group : Groups , current_user: Annotated[TokenData, Depen
     user_cursor = get_user(user_collection.find_one({ 'user_Email' : current_user.user_Email}))
     if user_cursor["user_Type"] == "educator" :
         group_collection.insert_one(dict(group))
-        return user_cursor["user_Type"] + " Created group"
+        return True
     
-    return user_cursor["user_Type"]
+    return False
 
 @groupRouter.get('/fetchGroups')
 async def fetch_group(current_user: Annotated[TokenData, Depends(get_current_active_user)]):
+
     user_cursor = get_user(user_collection.find_one({ 'user_Email' : current_user.user_Email}))
     groupIds = user_cursor["group_Ids"]
+
     grps = list()
+
     if groupIds != [] :
-        for gid in groupIds :
-            grps.append(get_group(group_collection.find_one({"group_Id" : gid})))
-            return grps
-        
+        for code in groupIds :
+            grps.append(get_group(group_collection.find_one({"group_Id" : code})))
+            
+        return grps
     return False
 
 
@@ -38,3 +41,15 @@ async def join_group(code : str , current_user: Annotated[TokenData, Depends(get
     else:
         group_collection.find_one_and_update({'group_Id' : code},{"$push" : {"learner_Ids" : user_cursor["user_Id"]}})
     return True
+
+
+@groupRouter.get('/userInGroups')
+async def user_In_group( code : str , current_user : Annotated[TokenData, Depends(get_current_active_user)]):
+    
+    group = get_group(group_collection.find({"group_Id" : code}))
+    educator_Ids = group["educator_Ids"]
+    learner_Ids = group["learner_Ids"]
+
+
+
+
