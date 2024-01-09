@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-class Users(BaseModel):
+class Users_Model(BaseModel):
     user_Id : str
     user_Fname : str
     user_Lname : str
@@ -9,14 +9,15 @@ class Users(BaseModel):
     user_Type : str
     hashed_password : str
     
-class Groups(BaseModel):
+class Groups_Model(BaseModel):
     group_Id : str
     group_Name : str
     group_Subject : str
     educator_Ids : list | None = []
     learner_Ids : list | None = []
+    resource_Ids : list | None = []
 
-class Resources(BaseModel):
+class Resources_Model(BaseModel):
     resource_Id : str
     lecture_Transcript : str
     summarized_Text  : str
