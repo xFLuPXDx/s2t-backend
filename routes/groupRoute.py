@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends
 from auth import TokenData, get_current_active_user
 from config.db import group_collection , user_collection
 from models.model import  Groups
-from schemas.users import get_groups , get_group, get_user 
+from schemas.users import get_groups , get_group, get_user, get_users 
 
 groupRouter = APIRouter()
 
@@ -46,9 +46,20 @@ async def join_group(code : str , current_user: Annotated[TokenData, Depends(get
 @groupRouter.get('/userInGroups')
 async def user_In_group( code : str , current_user : Annotated[TokenData, Depends(get_current_active_user)]):
     
-    group = get_group(group_collection.find({"group_Id" : code}))
+    group = get_group(group_collection.find_one({"group_Id" : code}))
     educator_Ids = group["educator_Ids"]
     learner_Ids = group["learner_Ids"]
+
+    users_in_group = list()
+
+    for id in educator_Ids:
+        users_in_group.append(get_user(user_collection.find_one({"user_Id" : id})))
+
+    for id in learner_Ids:
+        users_in_group.append(get_user(user_collection.find_one({"user_Id" : id})))
+    
+    return users_in_group
+
 
 
 
