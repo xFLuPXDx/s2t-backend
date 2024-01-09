@@ -1,4 +1,6 @@
 from datetime import datetime, timedelta
+import secrets
+import string
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -7,7 +9,7 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
 from config.db import user_collection 
-from models.model import Users
+from models.model import Users_Model
 
 # to get a string like this run:
 # openssl rand -hex 32
@@ -120,9 +122,21 @@ async def read_users_me(
 
 #works
 @authRouter.post("/signUp")
-async def signUp( user : Users):
+async def signUp( user : Users_Model):
 
     res = dict(user)
+
+    set_uids = set()
+
+    uids = user_collection.find({},{"_id" : 0 , "user_Id" : 1})
+    for uid in uids:
+        set_uids.add(uid["user_Id"])
+    
+    while True:
+        uid = ''.join(secrets.choice(string.digits) for _ in range(6))
+        if uid not in set_uids:
+            res["user_Id"] = uid
+            break
 
     user_collection.insert_one(
         {

@@ -24,6 +24,7 @@ def get_group(group) -> dict:
         "group_Subject" : group["group_Subject"],
         "educator_Ids" : group["educator_Ids"],
         "learner_Ids" : group["learner_Ids"],
+        "resource_Ids" : group["resource_Ids"],
     }
 
 def get_groups(groups) -> list:
@@ -44,3 +45,9 @@ def get_resources(resources) -> list:
     return [
         get_resource(resource) for resource in resources
     ]
+
+def get_user_Ids(iDs) -> dict :
+    return {
+        "educator_Ids" : iDs["educator_Ids"],
+        "learner_Ids" : iDs["learner_Ids"],
+    }
