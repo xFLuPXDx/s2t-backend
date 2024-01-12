@@ -124,19 +124,22 @@ async def read_users_me(
 @authRouter.post("/signUp")
 async def signUp( user : Users_Model):
 
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Email already registered",
+    )
+
     res = dict(user)
-
-    set_uids = set()
-
-    uids = user_collection.find({},{"_id" : 0 , "user_Id" : 1})
-    for uid in uids:
-        set_uids.add(uid["user_Id"])
+    
+    if user_collection.find_one({"user_Email" : res["user_Email"]}):
+        raise credentials_exception
     
     while True:
-        uid = ''.join(secrets.choice(string.digits) for _ in range(6))
-        if uid not in set_uids:
-            res["user_Id"] = uid
+        code = ''.join(secrets.choice(string.digits) for _ in range(6))
+        if not(user_collection.find_one({"user_Id" : code})):
+            res["user_Id"] = code
             break
+   
 
     user_collection.insert_one(
         {

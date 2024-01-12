@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends
 from auth import TokenData, get_current_active_user
 from config.db import group_collection , user_collection
 from models.model import  Groups_Model
-from schemas.users import get_groups , get_group, get_user, get_users 
+from schemas.users import  get_group, get_user
 
 groupRouter = APIRouter()
 
