@@ -11,16 +11,28 @@ groupRouter = APIRouter()
 
 @groupRouter.post('/insertGroup')
 async def insert_group(group : Groups_Model , current_user: Annotated[TokenData, Depends(get_current_active_user)]):
+    
+    user_cursor = user_collection.find_one({'user_Email' : current_user.user_Email} , {"user_Type" : 1 , "_id" : 1} )
 
-    user_cursor = get_user(user_collection.find_one({ 'user_Email' : current_user.user_Email}))
+    new_group = dict(group)
+
+    if user_cursor["user_Type"] == "educator" :
+        while True:
+            code = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(6))
+            if not(group_collection.find_one({"group_Id" : code})):
+                new_group["group_Id"] = code
+                break
+
+        group_collection.insert_one(new_group)
+        return True
+    
+    return False
+
+    """ user_cursor = get_user(user_collection.find_one({ 'user_Email' : current_user.user_Email}))
     new_group = dict(group)
 
     set_codes = set()
 
-    group_codes = group_collection.find({},{"_id" : 0 , "group_Id" : 1})
-    for group_code in group_codes:
-        set_codes.add(group_code["group_Id"])
-    
     while True:
         code = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(6))
         if code not in set_codes:
@@ -31,7 +43,7 @@ async def insert_group(group : Groups_Model , current_user: Annotated[TokenData,
         group_collection.insert_one(new_group)
         return True
     
-    return False
+    return False """
 
 @groupRouter.get('/fetchGroups')
 async def fetch_group(current_user: Annotated[TokenData, Depends(get_current_active_user)]):
