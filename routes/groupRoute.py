@@ -9,10 +9,10 @@ from schemas.users import  get_group, get_user
 
 groupRouter = APIRouter()
 
-@groupRouter.post('/insertGroup')
+@groupRouter.post('/group/insert')
 async def insert_group(group : Groups_Model , current_user: Annotated[TokenData, Depends(get_current_active_user)]):
     
-    user_cursor = user_collection.find_one({'user_Email' : current_user.user_Email} , {"user_Type" : 1 , "_id" : 1} )
+    user_cursor = user_collection.find_one({'user_Email' : current_user.user_Email} , {"user_Type" : 1 , "_id" : 0} )
 
     new_group = dict(group)
 
@@ -45,31 +45,28 @@ async def insert_group(group : Groups_Model , current_user: Annotated[TokenData,
     
     return False """
 
-@groupRouter.get('/fetchGroups')
+@groupRouter.get('/group/fetch')
 async def fetch_group(current_user: Annotated[TokenData, Depends(get_current_active_user)]):
 
     user_cursor = user_collection.find_one({ 'user_Email' : current_user.user_Email} , {"_id" : 0 , "group_Ids" : 1 })
-    groupIds = user_cursor["group_Ids"]
 
     grps = list()
 
-    if groupIds != [] :
-        for code in groupIds :
+    if user_cursor["group_Ids"] != [] :
+        for code in user_cursor["group_Ids"] :
             grps.append(get_group(group_collection.find_one({"group_Id" : code})))            
         return grps
     
     return False
 
 
-@groupRouter.post('/joinGroup')
+@groupRouter.post('/group/join')
 async def join_group(code : str , current_user: Annotated[TokenData, Depends(get_current_active_user)]):
 
     user_cursor = user_collection.find_one({ 'user_Email' : current_user.user_Email} , {"_id" : 0 ,"user_Id" : 1 , "group_Ids" : 1 , "user_Type" : 1})
 
     if code in user_cursor["group_Ids"]:
         return "already joined"
-    
-    
 
     if user_cursor["user_Type"] == "educator" : 
         group_collection.find_one_and_update({'group_Id' : code},{"$push" : {"educator_Ids" : user_cursor["user_Id"]}})
@@ -80,7 +77,7 @@ async def join_group(code : str , current_user: Annotated[TokenData, Depends(get
     return True
 
 
-@groupRouter.get('/userInGroups')
+@groupRouter.get('/group/users')
 async def user_In_group( code : str , current_user : Annotated[TokenData, Depends(get_current_active_user)]):
     
     group = group_collection.find_one({"group_Id" : code} , {"_id" : 0 , "educator_Ids" : 1 , "learner_Ids" : 1})
