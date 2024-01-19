@@ -1,4 +1,4 @@
-def get_user(user) -> dict:
+def get_single_user(user) -> dict:
     return{
         "_id" : str(user["_id"]) ,
         "user_Id" : user["user_Id"],
@@ -13,7 +13,7 @@ def get_user(user) -> dict:
 
 def get_users(users) -> list:
     return [
-        get_user(user) for user in users
+        get_single_user(user) for user in users
     ]
 
 def get_group(group) -> dict:

@@ -22,21 +22,22 @@ class Update_Password_Model(BaseModel):
 
 
 @userRouter.get('/user/get')
-async def fetch_users():
+async def fetch_users(current_user: Annotated[TokenData, Depends(get_current_active_user)]):
 
-    return get_users(user_collection.find())
+    return user_collection.find_one({"user_Email" : current_user.user_Email},{"_id" : 0 , "user_Fname" : 1 ,"user_Lname" : 1 , "user_Email" : 1 , "user_Type" : 1})
+
 
 @userRouter.put('/user/update/name')
-async def fetch_users(data : Update_User_Model , current_user: Annotated[TokenData, Depends(get_current_active_user)]):
+async def update_users(data : Update_User_Model , current_user: Annotated[TokenData, Depends(get_current_active_user)]):
 
     ## user = user_collection.find_one({"user_Email" : current_user} , {"_id" : 0 , "user_Fname" : 1 , "user_Lname" : 1 , "user_Email" : 1})
     user_collection.find_one_and_update({ "user_Email" : current_user.user_Email },{"$set" : {"user_Fname" : data.user_Fname , "user_Lname" : data.user_Lname }})
-    
+
     return True
 
 
 @userRouter.put('/user/update/password')
-async def fetch_users(data : Update_Password_Model , current_user: Annotated[TokenData, Depends(get_current_active_user)]):
+async def update_pwd_users(data : Update_Password_Model , current_user: Annotated[TokenData, Depends(get_current_active_user)]):
     pwd = user_collection.find_one({ "user_Email" : current_user.user_Email } , {"hashed_password" : 1 , "_id" : 0} ) 
     if pwd:
         if verify_password(data.old_password , pwd["hashed_password"]):
