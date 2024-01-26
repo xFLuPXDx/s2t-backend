@@ -125,7 +125,7 @@ async def read_users_me(
 async def signUp( user : Users_Model):
 
     credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
+        status_code=status.HTTP_409_CONFLICT,
         detail="Email already registered",
     )
 
@@ -158,3 +158,14 @@ async def signUp( user : Users_Model):
         data={"sub": res["user_Email"]}, expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
+
+@authRouter.post("/emailExist")
+def isEmailExist(email : str):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_409_CONFLICT,
+        detail="Email already registered",
+    )
+    if user_collection.find_one({"user_Email" : email}):
+        raise credentials_exception
+    
+    return True
