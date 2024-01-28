@@ -5,9 +5,13 @@ from fastapi import APIRouter, Depends
 from auth import TokenData, get_current_active_user
 from config.db import group_collection , user_collection
 from models.model import  Groups_Model
-from schemas.users import  get_group
+from schemas.users import  get_group, get_groups
 
 groupRouter = APIRouter()
+
+@groupRouter.get('/getGroup')
+async def getGroup():
+    return get_groups(group_collection.find())
 
 @groupRouter.post('/group/insert')
 async def insert_group(group : Groups_Model , current_user: Annotated[TokenData, Depends(get_current_active_user)]):
@@ -54,7 +58,7 @@ async def fetch_group(current_user: Annotated[TokenData, Depends(get_current_act
 
     if user_cursor["group_Ids"] != [] :
         for code in user_cursor["group_Ids"] :
-            grps.append(get_group(group_collection.find_one({"group_Id" : code})))            
+            grps.append(group_collection.find_one({"group_Id" : code} , {"_id" : 0 , "group_Name" : 1 , "group_Subject" : 1 }))            
         return grps
     
     return False
