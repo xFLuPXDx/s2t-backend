@@ -15,7 +15,7 @@ from models.model import Users_Model
 # openssl rand -hex 32
 SECRET_KEY = "7fc88d2a3526c846b443209e25fce190729f3b66c4ed1d94ce84f0b33599caf7"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 15
+ACCESS_TOKEN_EXPIRE_MINUTES = 1500
 
 authRouter = APIRouter()
 

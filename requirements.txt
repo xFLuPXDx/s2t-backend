@@ -1,5 +1,6 @@
 # pip freeze
 # pip install -r requirements.txt
+ #uvicorn main:app --reload --host  192.168.0.111  --port 80
 annotated-types==0.6.0
 anyio==4.2.0
 click==8.1.7
