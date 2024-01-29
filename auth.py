@@ -15,7 +15,7 @@ from models.model import Users_Model
 # openssl rand -hex 32
 SECRET_KEY = "7fc88d2a3526c846b443209e25fce190729f3b66c4ed1d94ce84f0b33599caf7"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 1500
+ACCESS_TOKEN_EXPIRE_DAYS = 7
 
 authRouter = APIRouter()
 
@@ -77,7 +77,7 @@ async def login_for_access_token(
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token_expires = timedelta(days=ACCESS_TOKEN_EXPIRE_DAYS)
     access_token = create_access_token(
         data={"sub": user["user_Email"]}, expires_delta=access_token_expires
     )
@@ -153,7 +153,7 @@ async def signUp( user : Users_Model):
         }
     )
 
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token_expires = timedelta(days=ACCESS_TOKEN_EXPIRE_DAYS)
     access_token = create_access_token(
         data={"sub": res["user_Email"]}, expires_delta=access_token_expires
     )
