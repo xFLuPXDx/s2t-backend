@@ -4,8 +4,8 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 from auth import TokenData, get_current_active_user
 from config.db import group_collection , user_collection
-from models.model import  Groups_Model
-from schemas.users import  get_group, get_groups
+from models.model import  Groups_Model , Code
+from schemas.users import  get_groups
 
 groupRouter = APIRouter()
 
@@ -13,10 +13,27 @@ groupRouter = APIRouter()
 async def getGroup():
     return get_groups(group_collection.find())
 
+
+@groupRouter.post('/group/delete')
+async def delete_group(code : Code , current_user: Annotated[TokenData, Depends(get_current_active_user)]):
+
+    dc = dict(code)
+
+    user_cursor = user_collection.find_one({ 'user_Email' : current_user.user_Email} , {"_id" : 0 ,"user_Id" : 1 , "user_Type" : 1})
+
+    user_collection.find_one_and_update({'user_Email' : current_user.user_Email},{"$pull" : { "group_Ids" :  dc["group_Id"] }})
+    
+    if user_cursor["user_Type"] == "educator" : 
+        group_collection.find_one_and_update({'group_Id' : dc["group_Id"]},{"$pull" : {"educator_Ids" : user_cursor["user_Id"]}})
+    else:
+        group_collection.find_one_and_update({'group_Id' :  dc["group_Id"]},{"$pull" : {"learner_Ids" : user_cursor["user_Id"]}})
+    return True
+
+
 @groupRouter.post('/group/insert')
 async def insert_group(group : Groups_Model , current_user: Annotated[TokenData, Depends(get_current_active_user)]):
     
-    user_cursor = user_collection.find_one({'user_Email' : current_user.user_Email} , {"user_Type" : 1 , "_id" : 0} )
+    user_cursor = user_collection.find_one({'user_Email' : current_user.user_Email} , {"user_Type" : 1 , "_id" : 0})
 
     new_group = dict(group)
 
@@ -55,29 +72,30 @@ async def fetch_group(current_user: Annotated[TokenData, Depends(get_current_act
     user_cursor = user_collection.find_one({ 'user_Email' : current_user.user_Email} , {"_id" : 0 , "group_Ids" : 1 })
 
     grps = list()
-
+    
     if user_cursor["group_Ids"] != [] :
         for code in user_cursor["group_Ids"] :
-            grps.append(group_collection.find_one({"group_Id" : code} , {"_id" : 0 , "group_Name" : 1 , "group_Subject" : 1 }))            
+            grps.append(group_collection.find_one({"group_Id" : code} , {"_id" : 0 ,"group_Id" : 1, "group_Name" : 1 , "group_Subject" : 1 }))              
         return grps
     
-    return False
+    return []
 
 
 @groupRouter.post('/group/join')
-async def join_group(code : str , current_user: Annotated[TokenData, Depends(get_current_active_user)]):
+async def join_group(code : Code , current_user: Annotated[TokenData, Depends(get_current_active_user)]):
 
+    dc = dict(code)
     user_cursor = user_collection.find_one({ 'user_Email' : current_user.user_Email} , {"_id" : 0 ,"user_Id" : 1 , "group_Ids" : 1 , "user_Type" : 1})
 
-    if code in user_cursor["group_Ids"]:
+    if dc["group_Id"] in user_cursor["group_Ids"]:
         return "already joined"
 
     if user_cursor["user_Type"] == "educator" : 
-        group_collection.find_one_and_update({'group_Id' : code},{"$push" : {"educator_Ids" : user_cursor["user_Id"]}})
+        group_collection.find_one_and_update({'group_Id' : dc["group_Id"]},{"$push" : {"educator_Ids" : user_cursor["user_Id"]}})
     else:
-        group_collection.find_one_and_update({'group_Id' : code},{"$push" : {"learner_Ids" : user_cursor["user_Id"]}})
+        group_collection.find_one_and_update({'group_Id' : dc["group_Id"]},{"$push" : {"learner_Ids" : user_cursor["user_Id"]}})
 
-    user_collection.find_one_and_update({'user_Email' : current_user.user_Email},{"$push" : { "group_Ids" : code }})
+    user_collection.find_one_and_update({'user_Email' : current_user.user_Email},{"$push" : { "group_Ids" : dc["group_Id"] }})
     return True
 
 

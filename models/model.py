@@ -22,3 +22,6 @@ class Resources_Model(BaseModel):
     lecture_Transcript : str
     summarized_Text  : str
     resource_links : list | None = []
+
+class Code(BaseModel):
+     group_Id : str
