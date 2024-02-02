@@ -33,10 +33,11 @@ async def delete_group(code : Code , current_user: Annotated[TokenData, Depends(
 @groupRouter.post('/group/insert')
 async def insert_group(group : Groups_Model , current_user: Annotated[TokenData, Depends(get_current_active_user)]):
     
-    user_cursor = user_collection.find_one({'user_Email' : current_user.user_Email} , {"user_Type" : 1 , "_id" : 0})
+    user_cursor = user_collection.find_one({'user_Email' : current_user.user_Email} , {"user_Type" : 1 , "_id" : 0 , "user_Id" : 1})
 
     new_group = dict(group)
-
+    new_group["educator_Ids"].append(user_cursor["user_Id"])
+    
     if user_cursor["user_Type"] == "educator" :
         while True:
             code = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(6))
@@ -45,26 +46,10 @@ async def insert_group(group : Groups_Model , current_user: Annotated[TokenData,
                 break
 
         group_collection.insert_one(new_group)
+        user_collection.find_one_and_update({'user_Email' : current_user.user_Email},{"$push" : { "group_Ids" :  new_group["group_Id"] }})
         return True
     
     return False
-
-    """ user_cursor = get_user(user_collection.find_one({ 'user_Email' : current_user.user_Email}))
-    new_group = dict(group)
-
-    set_codes = set()
-
-    while True:
-        code = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(6))
-        if code not in set_codes:
-            new_group["group_Id"] = code
-            break
-
-    if user_cursor["user_Type"] == "educator" :
-        group_collection.insert_one(new_group)
-        return True
-    
-    return False """
 
 @groupRouter.get('/group/fetch')
 async def fetch_group(current_user: Annotated[TokenData, Depends(get_current_active_user)]):
@@ -99,10 +84,12 @@ async def join_group(code : Code , current_user: Annotated[TokenData, Depends(ge
     return True
 
 
-@groupRouter.get('/group/users')
-async def user_In_group( code : str , current_user : Annotated[TokenData, Depends(get_current_active_user)]):
+@groupRouter.post('/group/users')
+async def user_In_group( code : Code , current_user : Annotated[TokenData, Depends(get_current_active_user)]):
     
-    group = group_collection.find_one({"group_Id" : code} , {"_id" : 0 , "educator_Ids" : 1 , "learner_Ids" : 1})
+    dc = dict(code)
+
+    group = group_collection.find_one({"group_Id" : dc["group_Id"]} , {"_id" : 0 , "educator_Ids" : 1 , "learner_Ids" : 1})
     educator_Ids = group["educator_Ids"]
     learner_Ids = group["learner_Ids"]
 

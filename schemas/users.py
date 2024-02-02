@@ -20,6 +20,7 @@ def get_group(group) -> dict:
     return {
         "group_Name" : group["group_Name"],
         "group_Subject" : group["group_Subject"],
+        "group_Id" : group["group_Id"],
     }
 
 def get_groups(groups) -> list:
