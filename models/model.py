@@ -19,6 +19,8 @@ class Groups_Model(BaseModel):
 
 class Resources_Model(BaseModel):
     resource_Id : str
+    date : str
+    time : str
     lecture_Transcript : str
     summarized_Text  : str
     resource_links : list | None = []

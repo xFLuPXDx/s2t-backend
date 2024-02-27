@@ -6,12 +6,48 @@ from auth import TokenData, get_current_active_user
 from config.db import group_collection , user_collection
 from models.model import  Groups_Model , Code
 from schemas.users import  get_groups
+from S2T.speechtotext import s2tConvert
 
 groupRouter = APIRouter()
 
 @groupRouter.get('/getGroup')
 async def getGroup():
     return get_groups(group_collection.find())
+
+@groupRouter.post('/group/peoples/learners')
+async def get_peoples(code : Code , current_user: Annotated[TokenData, Depends(get_current_active_user)]):
+
+    dc = dict(code)
+
+    learners_in_groups = group_collection.find_one({"group_Id" : dc["group_Id"]} , {"_id" : 0 , "learner_Ids" : 1  })
+    print(learners_in_groups)
+    learners = list()
+    
+    if learners_in_groups["learner_Ids"] != [] :
+        for code in learners_in_groups["learner_Ids"] :
+            learners.append(user_collection.find_one({"user_Id" : code} , {"_id" : 0 , "user_Fname" : 1 , "user_Lname" : 1}))             
+        return learners
+    
+
+    return []
+
+@groupRouter.post('/group/peoples/educators')
+
+async def get_peoples(code : Code , current_user: Annotated[TokenData, Depends(get_current_active_user)]):
+
+    dc = dict(code)
+
+    educators_in_groups = group_collection.find_one({"group_Id" : dc["group_Id"]} , {"_id" : 0 , "educator_Ids" : 1 })
+
+    educators = list()
+    
+    if educators_in_groups["educator_Ids"] != [] :
+        for code in educators_in_groups["educator_Ids"] :
+            educators.append(user_collection.find_one({"user_Id" : code} , {"_id" : 0 , "user_Fname" : 1 , "user_Lname" : 1}))             
+        return educators
+    
+
+    return []
 
 
 @groupRouter.post('/group/delete')
@@ -104,3 +140,6 @@ async def user_In_group( code : Code , current_user : Annotated[TokenData, Depen
     return users_in_group
 
 
+@groupRouter.post('/group/s2t')
+async def s2tCon():
+    return s2tConvert()

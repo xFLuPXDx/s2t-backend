@@ -1,6 +1,10 @@
 from pymongo import MongoClient
+from dotenv import dotenv_values
 
-conn = MongoClient("mongodb+srv://rohit:12345@fastapi.e2rnzdr.mongodb.net/")
+config = dotenv_values(".env")
+
+MONGO_URL = config['MONGO_URL']
+conn = MongoClient(MONGO_URL)
 
 db = conn.Users
 

@@ -2,7 +2,6 @@ from datetime import datetime, timedelta
 import secrets
 import string
 from typing import Annotated
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
@@ -10,12 +9,14 @@ from passlib.context import CryptContext
 from pydantic import BaseModel
 from config.db import user_collection 
 from models.model import Users_Model
+from dotenv import dotenv_values
 
-# to get a string like this run:
-# openssl rand -hex 32
-SECRET_KEY = "7fc88d2a3526c846b443209e25fce190729f3b66c4ed1d94ce84f0b33599caf7"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_DAYS = 7
+config = dotenv_values(".env")
+
+SECRET_KEY = config["SECRET_KEY"]
+ALGORITHM = config["ALGORITHM"]
+ACCESS_TOKEN_EXPIRE_DAYS =  int(config["ACCESS_TOKEN_EXPIRE_DAYS"])
+
 
 authRouter = APIRouter()
 
