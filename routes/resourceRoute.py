@@ -1,3 +1,4 @@
+import time
 from fastapi import APIRouter,File,UploadFile
 from S2T.speechtotext import s2tConvert
 from config.db import resource_collection
@@ -6,6 +7,7 @@ from schemas.users import get_resources
 import uuid
 import magic
 import boto3
+import os
 
 SUPPORTED_FILE_TYPES = {
     'audio/mpeg' : 'mpeg',
@@ -21,15 +23,22 @@ s3 = boto3.client(
 )
 
 resourceRouter = APIRouter()
-tmp = "S2T/temp"
+tmp = "S2T/temp/"
+
 @resourceRouter.post('/resource/upload')
 async def upload_file(file:UploadFile = File(...)):
+
     contents = await file.read()
+
     file_type = magic.from_buffer(buffer=contents , mime=True)
     file.filename = f"{uuid.uuid4()}.{SUPPORTED_FILE_TYPES[file_type]}"
     with open(f"{tmp}{file.filename}","wb") as f:
         f.write(contents)
-    summarry = s2tConvert(f"{tmp}{file.filename}")
-    s3.upload_file(f"{tmp}{file.filename}","clarity",file.filename)
+
+    ntype = f"{uuid.uuid4()}.mp3"
+    os.system(f"ffmpeg -i {tmp}{file.filename} -c:a libmp3lame {tmp}{ntype}")
+
+    summarry = s2tConvert(f"{tmp}{ntype}")
+    s3.upload_file(f"{tmp}{ntype}","clarity",f"{ntype}")
     
-    return {"Filename " : file.filename , "summarry" : summarry}
+    return {"Filename " : ntype , "summarry" : summarry}
