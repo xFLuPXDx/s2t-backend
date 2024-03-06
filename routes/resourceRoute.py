@@ -40,5 +40,7 @@ async def upload_file(file:UploadFile = File(...)):
 
     summarry = s2tConvert(f"{tmp}{ntype}")
     s3.upload_file(f"{tmp}{ntype}","clarity",f"{ntype}")
-    
+    os.remove(f"{tmp}{ntype}")
+    os.remove(f"{tmp}{file.filename}")
+    print(summarry)
     return {"Filename " : ntype , "summarry" : summarry}

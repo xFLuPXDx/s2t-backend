@@ -19,7 +19,6 @@ async def get_peoples(code : Code , current_user: Annotated[TokenData, Depends(g
     dc = dict(code)
 
     learners_in_groups = group_collection.find_one({"group_Id" : dc["group_Id"]} , {"_id" : 0 , "learner_Ids" : 1  })
-    print(learners_in_groups)
     learners = list()
     
     if learners_in_groups["learner_Ids"] != [] :

@@ -7,7 +7,6 @@ def s2tConvert(file):
   config = dotenv_values(".env")
   API_KEY = config["OPEN_AI_S2T_KEY"]
 
-  from openai import OpenAI
   client = OpenAI(api_key=API_KEY)
   audio_file = open(file, "rb")
   transcript = client.audio.transcriptions.create(
@@ -20,7 +19,7 @@ def s2tConvert(file):
     model="gpt-3.5-turbo-0125",
     response_format={ "type": "json_object" },
     messages=[
-      {"role": "system", "content": "You are a helpful assistant designed to give summary , headpoints and topics covered and also youtube urls for topic for subject related software quality designed to output JSON"},
+      {"role": "system", "content": "You are a helpful assistant designed to give summary , headpoints and topics covered and also youtube urls designed to output JSON"},
       {"role": "user", "content": transcript}
     ]
   )
