@@ -6,7 +6,6 @@ from auth import TokenData, get_current_active_user
 from config.db import group_collection , user_collection
 from models.model import  Groups_Model , Code
 from schemas.users import  get_groups
-from S2T.speechtotext import s2tConvert
 
 groupRouter = APIRouter()
 
@@ -139,7 +138,3 @@ async def user_In_group( code : Code , current_user : Annotated[TokenData, Depen
     
     return users_in_group
 
-
-@groupRouter.post('/group/s2t')
-async def s2tCon():
-    return s2tConvert()

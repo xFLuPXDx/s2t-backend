@@ -10,7 +10,8 @@ import boto3
 SUPPORTED_FILE_TYPES = {
     'audio/mpeg' : 'mpeg',
     'audio/mp3' : 'mp3',
-    'image/png' : 'png'
+    'image/png' : 'png',
+    'video/3gpp' : '3gpp'
 }
 s3 = boto3.client(
     service_name='s3',
@@ -20,7 +21,7 @@ s3 = boto3.client(
 )
 
 resourceRouter = APIRouter()
-tmp = "c:/learning/project/fastmongo/venv/fastmongo/S2T/temp/"
+tmp = "S2T/temp"
 @resourceRouter.post('/resource/upload')
 async def upload_file(file:UploadFile = File(...)):
     contents = await file.read()
