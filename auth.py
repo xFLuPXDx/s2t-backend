@@ -2,7 +2,6 @@ from datetime import datetime, timedelta
 import secrets
 import string
 from typing import Annotated
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
@@ -10,12 +9,14 @@ from passlib.context import CryptContext
 from pydantic import BaseModel
 from config.db import user_collection 
 from models.model import Users_Model
+from dotenv import dotenv_values
 
-# to get a string like this run:
-# openssl rand -hex 32
-SECRET_KEY = "7fc88d2a3526c846b443209e25fce190729f3b66c4ed1d94ce84f0b33599caf7"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 15
+config = dotenv_values(".env")
+
+SECRET_KEY = config["SECRET_KEY"]
+ALGORITHM = config["ALGORITHM"]
+ACCESS_TOKEN_EXPIRE_DAYS =  int(config["ACCESS_TOKEN_EXPIRE_DAYS"])
+
 
 authRouter = APIRouter()
 
@@ -77,7 +78,7 @@ async def login_for_access_token(
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token_expires = timedelta(days=ACCESS_TOKEN_EXPIRE_DAYS)
     access_token = create_access_token(
         data={"sub": user["user_Email"]}, expires_delta=access_token_expires
     )
@@ -124,19 +125,22 @@ async def read_users_me(
 @authRouter.post("/signUp")
 async def signUp( user : Users_Model):
 
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_409_CONFLICT,
+        detail="Email already registered",
+    )
+
     res = dict(user)
-
-    set_uids = set()
-
-    uids = user_collection.find({},{"_id" : 0 , "user_Id" : 1})
-    for uid in uids:
-        set_uids.add(uid["user_Id"])
+    
+    if user_collection.find_one({"user_Email" : res["user_Email"]}):
+        raise credentials_exception
     
     while True:
-        uid = ''.join(secrets.choice(string.digits) for _ in range(6))
-        if uid not in set_uids:
-            res["user_Id"] = uid
+        code = ''.join(secrets.choice(string.digits) for _ in range(6))
+        if not(user_collection.find_one({"user_Id" : code})):
+            res["user_Id"] = code
             break
+   
 
     user_collection.insert_one(
         {
@@ -150,8 +154,19 @@ async def signUp( user : Users_Model):
         }
     )
 
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token_expires = timedelta(days=ACCESS_TOKEN_EXPIRE_DAYS)
     access_token = create_access_token(
         data={"sub": res["user_Email"]}, expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
+
+@authRouter.post("/emailExist")
+def isEmailExist(email : str):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_409_CONFLICT,
+        detail="Email already registered",
+    )
+    if user_collection.find_one({"user_Email" : email}):
+        raise credentials_exception
+    
+    return True
