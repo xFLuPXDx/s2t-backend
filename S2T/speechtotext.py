@@ -1,6 +1,6 @@
 from openai import OpenAI
 from dotenv import dotenv_values
-
+import json
 
 
 def s2tConvert(file):
@@ -19,8 +19,9 @@ def s2tConvert(file):
     model="gpt-3.5-turbo-0125",
     response_format={ "type": "json_object" },
     messages=[
-      {"role": "system", "content": "You are a helpful assistant designed to give summary , headpoints and topics covered and also youtube urls designed to output JSON"},
+      {"role": "system", "content": "You are a helpful assistant designed to give summary , headpoints and also youtube urls designed to output JSON"},
       {"role": "user", "content": transcript}
     ]
   )
-  return response.choices[0].message.content
+  
+  return json.loads(response.choices[0].message.content)

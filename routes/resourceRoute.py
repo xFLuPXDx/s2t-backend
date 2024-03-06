@@ -25,8 +25,8 @@ s3 = boto3.client(
 resourceRouter = APIRouter()
 tmp = "S2T/temp/"
 
-@resourceRouter.post('/resource/upload')
-async def upload_file(file:UploadFile = File(...)):
+@resourceRouter.post('/resource/upload/{gid}')
+async def upload_file(gid : str , file:UploadFile = File(...) ):
 
     contents = await file.read()
 
@@ -42,5 +42,8 @@ async def upload_file(file:UploadFile = File(...)):
     s3.upload_file(f"{tmp}{ntype}","clarity",f"{ntype}")
     os.remove(f"{tmp}{ntype}")
     os.remove(f"{tmp}{file.filename}")
-    print(summarry)
-    return {"Filename " : ntype , "summarry" : summarry}
+    print(type(summarry))
+    print(gid)
+    print(summarry['summary'])
+    return {"Filename " : ntype , "summarry" : summarry['summary']}
+ 
