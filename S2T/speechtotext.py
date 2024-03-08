@@ -19,8 +19,9 @@ def s2tConvert(file):
     model="gpt-3.5-turbo-0125",
     response_format={ "type": "json_object" },
     messages=[
-      {"role": "system", "content": "You are a helpful assistant designed to give summary , headpoints and also youtube urls designed to output JSON"},
-      {"role": "user", "content": transcript}
+      {"role": "system", "content": "You are a helpful assistant designed to give summary , headpoints and youtube urls designed to output JSON"},
+      {"role": "user", "content": transcript},
+      {"role": "system", "content": "make sure to include these  summary , headpoints and youtube urls"}
     ]
   )
   

@@ -19,10 +19,9 @@ class Groups_Model(BaseModel):
 
 class Resources_Model(BaseModel):
     resource_Id : str
-    date : str
-    time : str
-    lecture_Transcript : str
+    time_Stamp : str
     summarized_Text  : str
+    topics_Covered  : list | None = []
     resource_links : list | None = []
 
 class Code(BaseModel):
