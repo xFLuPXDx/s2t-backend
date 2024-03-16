@@ -19,12 +19,18 @@ async def get_peoples(code : Code , current_user: Annotated[TokenData, Depends(g
     dc = dict(code)
 
     learners_in_groups = group_collection.find_one({"group_Id" : dc["group_Id"]} , {"_id" : 0 , "learner_Ids" : 1  })
-    learners = list()
+
+    lrs = dict()
+    learnerslist = list()
     
     if learners_in_groups["learner_Ids"] != [] :
         for code in learners_in_groups["learner_Ids"] :
-            learners.append(user_collection.find_one({"user_Id" : code} , {"_id" : 0 , "user_Fname" : 1 , "user_Lname" : 1}))             
-        return learners
+            learnerslist.append(user_collection.find_one({"user_Id" : code} , {"_id" : 0 , "user_Fname" : 1 , "user_Lname" : 1}))           
+        lrs.update({
+            "count" : len(learnerslist),
+            "result" : learnerslist
+        })         
+        return lrs
     
 
     return []
@@ -36,13 +42,17 @@ async def get_peoples(code : Code , current_user: Annotated[TokenData, Depends(g
     dc = dict(code)
 
     educators_in_groups = group_collection.find_one({"group_Id" : dc["group_Id"]} , {"_id" : 0 , "educator_Ids" : 1 })
-
-    educators = list()
+    eds = dict()
+    educatorslist = list()
     
     if educators_in_groups["educator_Ids"] != [] :
         for code in educators_in_groups["educator_Ids"] :
-            educators.append(user_collection.find_one({"user_Id" : code} , {"_id" : 0 , "user_Fname" : 1 , "user_Lname" : 1}))             
-        return educators
+            educatorslist.append(user_collection.find_one({"user_Id" : code} , {"_id" : 0 , "user_Fname" : 1 , "user_Lname" : 1}))    
+        eds.update({
+            "count" : len(educatorslist),
+            "result" : educatorslist
+        })         
+        return eds
     
 
     return []

@@ -3,6 +3,7 @@ from dotenv import dotenv_values
 import json
 
 
+
 def s2tConvert(file):
   config = dotenv_values(".env")
   API_KEY = config["OPEN_AI_S2T_KEY"]
@@ -14,14 +15,14 @@ def s2tConvert(file):
     file=audio_file, 
     response_format="text"
   )
-
+ 
   response = client.chat.completions.create(
     model="gpt-3.5-turbo-0125",
     response_format={ "type": "json_object" },
     messages=[
-      {"role": "system", "content": "You are a helpful assistant designed to give summary , headpoints and youtube urls designed to output JSON"},
+      {"role": "system", "content": "You are a helpful assistant who give summary and headpooints from the given content and gives the output JSON"},
       {"role": "user", "content": transcript},
-      {"role": "system", "content": "make sure to include these  summary , headpoints and youtube urls"}
+      {"role": "system", "content": "make sure to include these keys in json summary and headpoints "}
     ]
   )
   
