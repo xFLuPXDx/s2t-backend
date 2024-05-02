@@ -74,7 +74,7 @@ async def login_for_access_token(
     user = authenticate_user(form_data.username, form_data.password)
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code = status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
@@ -169,4 +169,7 @@ def isEmailExist(email : str):
     if user_collection.find_one({"user_Email" : email}):
         raise credentials_exception
     
-    return True
+    return HTTPException(
+        status_code=status.HTTP_202_ACCEPTED,
+        detail="Succesful",
+    )
