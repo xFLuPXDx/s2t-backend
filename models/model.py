@@ -26,3 +26,6 @@ class Resources_Model(BaseModel):
 
 class Code(BaseModel):
      group_Id : str
+
+class Rid(BaseModel):
+     rid : str

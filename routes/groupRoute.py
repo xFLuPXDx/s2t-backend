@@ -4,8 +4,8 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException , status
 from auth import TokenData, get_current_active_user
 from config.db import group_collection , user_collection
-from models.model import  Groups_Model , Code
-from schemas.users import  get_groups
+from models.model import Groups_Model , Code
+from schemas.users import get_groups
 
 groupRouter = APIRouter()
 
@@ -69,12 +69,15 @@ async def delete_group(code : Code , current_user: Annotated[TokenData, Depends(
     
     if user_cursor["user_Type"] == "educator" : 
         group_collection.find_one_and_update({'group_Id' : dc["group_Id"]},{"$pull" : {"educator_Ids" : user_cursor["user_Id"]}})
+        return True
     else:
         group_collection.find_one_and_update({'group_Id' :  dc["group_Id"]},{"$pull" : {"learner_Ids" : user_cursor["user_Id"]}})
-    return True
+        return True
+    
+    return False
 
 
-@groupRouter.post('/group/insert')
+@groupRouter.post('/group/create')
 async def insert_group(group : Groups_Model , current_user: Annotated[TokenData, Depends(get_current_active_user)]):
     
     user_cursor = user_collection.find_one({'user_Email' : current_user.user_Email} , {"user_Type" : 1 , "_id" : 0 , "user_Id" : 1})
@@ -129,9 +132,11 @@ async def join_group(code : Code , current_user: Annotated[TokenData, Depends(ge
             group_collection.find_one_and_update({'group_Id' : dc["group_Id"]},{"$push" : {"learner_Ids" : user_cursor["user_Id"]}})
 
         user_collection.find_one_and_update({'user_Email' : current_user.user_Email},{"$push" : { "group_Ids" : dc["group_Id"] }})
-        return True
+        raise HTTPException(
+            status_code=status.HTTP_200_OK,
+        )
     
-    return HTTPException(
+    raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Invalid Code",
         )
