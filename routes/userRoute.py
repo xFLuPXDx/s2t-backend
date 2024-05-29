@@ -15,7 +15,6 @@ class Update_User_Model(BaseModel):
     user_Lname : str
 
 
-
 class Update_Password_Model(BaseModel):
     old_password : str 
     new_password : str
